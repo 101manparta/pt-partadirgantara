@@ -1,0 +1,6 @@
+{
+  "name": "PT PARTA DIRGANTARA — Indonesian Clove Exporter",
+  "description": "Official B2B export portal and trade management platform for PT PARTA DIRGANTARA, supplying premium Indonesian dried whole cloves (Syzygium aromaticum) to global markets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
