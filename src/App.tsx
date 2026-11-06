@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Language, VisualEffectMode, Product, DocumentItem, SiteSettings } from './lib/types';
-import { fetchProducts, fetchDocuments, fetchSettings, DEFAULT_PRODUCT, DEFAULT_DOCUMENTS, DEFAULT_SETTINGS } from './lib/supabase';
+import { Language, VisualEffectMode, Product, DocumentItem, SiteSettings, DocumentationActivity } from './lib/types';
+import {
+  fetchProducts,
+  fetchDocuments,
+  fetchSettings,
+  fetchDocumentationActivities,
+  DEFAULT_PRODUCT,
+  DEFAULT_DOCUMENTS,
+  DEFAULT_SETTINGS,
+  DEFAULT_DOCUMENTATION_ACTIVITIES,
+} from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { ExportMarquee } from './components/ExportMarquee';
@@ -10,6 +19,7 @@ import { SpecificationsSection } from './components/SpecificationsSection';
 import { WhyIndonesianCloves } from './components/WhyIndonesianCloves';
 import { SourcingSupplyChain } from './components/SourcingSupplyChain';
 import { LogisticsSection } from './components/LogisticsSection';
+import { DocumentationGallery } from './components/DocumentationGallery';
 import { DocumentsSection } from './components/DocumentsSection';
 import { RFQSection } from './components/RFQSection';
 import { ContactSection } from './components/ContactSection';
@@ -48,6 +58,7 @@ export default function App() {
   const [product, setProduct] = useState<Product>(DEFAULT_PRODUCT);
   const [documents, setDocuments] = useState<DocumentItem[]>(DEFAULT_DOCUMENTS);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [activities, setActivities] = useState<DocumentationActivity[]>(DEFAULT_DOCUMENTATION_ACTIVITIES);
   const [selectedRFQProduct, setSelectedRFQProduct] = useState<string>('Indonesian Whole Dried Cloves (Syzygium aromaticum)');
 
   // Sync route on popstate/hashchange
@@ -70,14 +81,16 @@ export default function App() {
   // Load public data from Supabase / data layer
   const loadPublicData = async () => {
     try {
-      const [prods, docs, sett] = await Promise.all([
+      const [prods, docs, sett, acts] = await Promise.all([
         fetchProducts(),
         fetchDocuments(),
         fetchSettings(),
+        fetchDocumentationActivities(true),
       ]);
       if (prods && prods.length > 0) setProduct(prods[0]);
       if (docs && docs.length > 0) setDocuments(docs);
       if (sett) setSettings(sett);
+      if (acts) setActivities(acts);
     } catch (e) {
       console.warn('Error loading public data:', e);
     }
@@ -91,7 +104,11 @@ export default function App() {
       loadPublicData();
     };
     window.addEventListener('ptpd_data_updated', handleDataUpdated);
-    return () => window.removeEventListener('ptpd_data_updated', handleDataUpdated);
+    window.addEventListener('ptpd_documentation_updated', handleDataUpdated);
+    return () => {
+      window.removeEventListener('ptpd_data_updated', handleDataUpdated);
+      window.removeEventListener('ptpd_documentation_updated', handleDataUpdated);
+    };
   }, []);
 
   const handleLanguageChange = (lang: Language) => {
@@ -192,7 +209,13 @@ export default function App() {
         {/* 8. Export & Logistics Workflow */}
         <LogisticsSection currentLang={currentLang} />
 
-        {/* 9. Documents & Download Center */}
+        {/* 9. Dokumentasi & Galeri Kegiatan PT PARTA DIRGANTARA */}
+        <DocumentationGallery
+          currentLang={currentLang}
+          activities={activities}
+        />
+
+        {/* 10. Documents & Download Center */}
         <DocumentsSection
           currentLang={currentLang}
           documents={documents}

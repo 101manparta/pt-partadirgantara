@@ -100,11 +100,59 @@
   animation-play-state: paused;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-marquee-rtl {
-    animation-duration: 90s;
+/* Seamless Left-to-Right Marquee */
+@keyframes marquee-ltr {
+  0% {
+    transform: translateX(-50%);
   }
-  .subtle-float, .subtle-ship, .subtle-plane {
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee-ltr {
+  display: flex;
+  width: max-content;
+  animation: marquee-ltr 42s linear infinite;
+}
+
+.animate-marquee-ltr:hover {
+  animation-play-state: paused;
+}
+
+/* Subtle vertical float rhythms for gallery cards */
+@keyframes subtle-float-down {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes subtle-float-up {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-down {
+  animation: subtle-float-down 7s ease-in-out infinite;
+}
+
+.animate-float-up {
+  animation: subtle-float-up 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-rtl,
+  .animate-marquee-ltr {
+    animation-duration: 120s;
+  }
+  .subtle-float, .subtle-ship, .subtle-plane, .animate-float-down, .animate-float-up {
     animation: none !important;
   }
 }

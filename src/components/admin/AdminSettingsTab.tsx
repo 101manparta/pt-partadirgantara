@@ -85,12 +85,43 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 6. DOCUMENTATION ACTIVITIES
+CREATE TABLE IF NOT EXISTS public.documentation_activities (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title TEXT NOT NULL,
+  caption TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL DEFAULT 'kegiatan_ekspor',
+  activity_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  location TEXT,
+  image_url TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'published' CHECK (status IN ('published', 'draft')),
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. MEDIA ASSETS
+CREATE TABLE IF NOT EXISTS public.media_assets (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  file_name TEXT NOT NULL,
+  file_size TEXT NOT NULL,
+  file_type TEXT,
+  image_url TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  category TEXT DEFAULT 'general',
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ROW LEVEL SECURITY
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rfq_inquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documentation_activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.media_assets ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public can insert RFQ inquiries" ON public.rfq_inquiries FOR INSERT TO anon, authenticated WITH CHECK (true);
 CREATE POLICY "Admins can manage RFQs" ON public.rfq_inquiries FOR ALL TO authenticated USING (true);
@@ -99,7 +130,17 @@ CREATE POLICY "Admins can manage products" ON public.products FOR ALL TO authent
 CREATE POLICY "Public can view public documents" ON public.documents FOR SELECT TO anon, authenticated USING (is_public = true);
 CREATE POLICY "Admins can manage documents" ON public.documents FOR ALL TO authenticated USING (true);
 CREATE POLICY "Public can view settings" ON public.site_settings FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "Admins can update settings" ON public.site_settings FOR ALL TO authenticated USING (true);`;
+CREATE POLICY "Admins can update settings" ON public.site_settings FOR ALL TO authenticated USING (true);
+CREATE POLICY "Public can view published activities" ON public.documentation_activities FOR SELECT TO anon, authenticated USING (status = 'published');
+CREATE POLICY "Admins can manage activities" ON public.documentation_activities FOR ALL TO authenticated USING (true);
+CREATE POLICY "Public can view media" ON public.media_assets FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Admins can manage media" ON public.media_assets FOR ALL TO authenticated USING (true);
+
+-- STORAGE BUCKET
+INSERT INTO storage.buckets (id, name, public) VALUES ('documentation', 'documentation', true) ON CONFLICT (id) DO NOTHING;
+CREATE POLICY "Public can view documentation images" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'documentation');
+CREATE POLICY "Admins can upload documentation images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'documentation');
+CREATE POLICY "Admins can delete documentation images" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'documentation');`;
 
 export const AdminSettingsTab: React.FC<SettingsTabProps> = ({ settings, onRefresh }) => {
   const currentConfig = getSupabaseConfig();

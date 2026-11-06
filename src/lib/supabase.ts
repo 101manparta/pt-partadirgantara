@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { RFQInquiry, Product, ProductSpec, DocumentItem, Buyer, SiteSettings } from './types';
+import { RFQInquiry, Product, ProductSpec, DocumentItem, Buyer, SiteSettings, DocumentationActivity, MediaAsset } from './types';
 
 // Initial default product specification data for Indonesian Whole Cloves
 export const DEFAULT_CLOVE_SPECS: ProductSpec[] = [
@@ -83,6 +83,108 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   primary_port: 'Tanjung Priok (Jakarta) / Tanjung Perak (Surabaya)',
   incoterms_supported: 'FOB, CFR, CIF (Incoterms 2020)',
 };
+
+export const DEFAULT_DOCUMENTATION_ACTIVITIES: DocumentationActivity[] = [
+  {
+    id: 'act-1',
+    title: 'Persiapan Ekspor & Muat Kontainer Lal Pari',
+    caption: 'Persiapan dan koordinasi operasional sebelum proses pengapalan kontainer 20ft FCL.',
+    description: 'Pemeriksaan akhir kondisi fisik karung goni 50kg, kebersihan wadah, dan penerapan segel kontainer surveyor untuk tujuan pelabuhan internasional.',
+    category: 'kegiatan_ekspor',
+    activity_date: '2026-11-06',
+    location: 'Tanjung Priok Export Hub, Jakarta',
+    image_url: '/src/assets/images/export_quality_sorting_1793940754934.jpg',
+    storage_path: 'documentation/2026/november/export_quality_sorting_initial.jpg',
+    display_order: 1,
+    status: 'published',
+    created_at: new Date('2026-11-06T08:30:00Z').toISOString(),
+  },
+  {
+    id: 'act-2',
+    title: 'Kunjungan Lapangan & Pengawasan Panen Sulawesi',
+    caption: 'Inspeksi langsung ke sentra perkebunan cengkeh rakyat bersama mitra petani.',
+    description: 'Memantau kematangan kuncup bunga cengkeh sebelum petik untuk memastikan kandungan eugenol dan keutuhan mahkota kuntum memenuhi standar ekspor.',
+    category: 'kunjungan',
+    activity_date: '2026-10-24',
+    location: 'Sentra Perkebunan Sulawesi Selatan',
+    image_url: '/src/assets/images/clove_spice_plantation_1793940755065.jpg',
+    storage_path: 'documentation/2026/october/clove_spice_plantation_initial.jpg',
+    display_order: 2,
+    status: 'published',
+    created_at: new Date('2026-10-24T09:15:00Z').toISOString(),
+  },
+  {
+    id: 'act-3',
+    title: 'Sortasi Kuntum & Verifikasi Kadar Air Laboratorium',
+    caption: 'Pengujian kadar air menggunakan moisture meter digital tersertifikasi.',
+    description: 'Proses penapisan mekanis dan sortasi manual oleh tim pengendali mutu guna memastikan kadar air konsisten pada batas maksimum 12.0%.',
+    category: 'operasional',
+    activity_date: '2026-10-18',
+    location: 'Laboratorium QC PT PARTA DIRGANTARA',
+    image_url: '/src/assets/images/hero_indonesian_cloves_1793940752489.jpg',
+    storage_path: 'documentation/2026/october/hero_indonesian_cloves_initial.jpg',
+    display_order: 3,
+    status: 'published',
+    created_at: new Date('2026-10-18T14:00:00Z').toISOString(),
+  },
+  {
+    id: 'act-4',
+    title: 'Verifikasi Fisik Sampel Cengkeh Kering Utuh',
+    caption: 'Verifikasi visual warna cokelat kemerahan alami dan kepadatan kuntum.',
+    description: 'Pengemasan sampel representatif untuk pengujian independen pra-pengapalan oleh surveyor Sucofindo / SGS.',
+    category: 'produk',
+    activity_date: '2026-10-10',
+    location: 'Fasilitas Pengemasan & Gudang Jakarta',
+    image_url: '/src/assets/images/product_whole_cloves_1793940753160.jpg',
+    storage_path: 'documentation/2026/october/product_whole_cloves_initial.jpg',
+    display_order: 4,
+    status: 'published',
+    created_at: new Date('2026-10-10T11:20:00Z').toISOString(),
+  },
+];
+
+export const DEFAULT_MEDIA_ASSETS: MediaAsset[] = [
+  {
+    id: 'med-1',
+    file_name: 'export_quality_sorting_initial.jpg',
+    file_size: '2.4 MB',
+    file_type: 'image/jpeg',
+    image_url: '/src/assets/images/export_quality_sorting_1793940754934.jpg',
+    storage_path: 'documentation/2026/november/export_quality_sorting_initial.jpg',
+    category: 'kegiatan_ekspor',
+    created_at: new Date('2026-11-06T08:30:00Z').toISOString(),
+  },
+  {
+    id: 'med-2',
+    file_name: 'clove_spice_plantation_initial.jpg',
+    file_size: '3.1 MB',
+    file_type: 'image/jpeg',
+    image_url: '/src/assets/images/clove_spice_plantation_1793940755065.jpg',
+    storage_path: 'documentation/2026/october/clove_spice_plantation_initial.jpg',
+    category: 'kunjungan',
+    created_at: new Date('2026-10-24T09:15:00Z').toISOString(),
+  },
+  {
+    id: 'med-3',
+    file_name: 'hero_indonesian_cloves_initial.jpg',
+    file_size: '1.9 MB',
+    file_type: 'image/jpeg',
+    image_url: '/src/assets/images/hero_indonesian_cloves_1793940752489.jpg',
+    storage_path: 'documentation/2026/october/hero_indonesian_cloves_initial.jpg',
+    category: 'operasional',
+    created_at: new Date('2026-10-18T14:00:00Z').toISOString(),
+  },
+  {
+    id: 'med-4',
+    file_name: 'product_whole_cloves_initial.jpg',
+    file_size: '2.2 MB',
+    file_type: 'image/jpeg',
+    image_url: '/src/assets/images/product_whole_cloves_1793940753160.jpg',
+    storage_path: 'documentation/2026/october/product_whole_cloves_initial.jpg',
+    category: 'produk',
+    created_at: new Date('2026-10-10T11:20:00Z').toISOString(),
+  },
+];
 
 // Check environment variables or local storage for Supabase configuration
 export function getSupabaseConfig(): { url: string; key: string; isConfigured: boolean } {
@@ -405,3 +507,339 @@ export async function saveSettings(settings: SiteSettings): Promise<boolean> {
   }
   return false;
 }
+
+// ==========================================
+// DATA ACCESS LAYER: DOCUMENTATION ACTIVITIES
+// ==========================================
+
+export async function fetchDocumentationActivities(onlyPublished = false): Promise<DocumentationActivity[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      let query = supabase
+        .from('documentation_activities')
+        .select('*')
+        .order('display_order', { ascending: true })
+        .order('activity_date', { ascending: false });
+
+      if (onlyPublished) {
+        query = query.eq('status', 'published');
+      }
+
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return data as DocumentationActivity[];
+      }
+    } catch (e) {
+      console.warn('Supabase fetch documentation error:', e);
+    }
+  }
+
+  // Fallback local persistence
+  if (typeof window !== 'undefined') {
+    const raw = localStorage.getItem('ptpd_documentation_activities');
+    if (raw) {
+      try {
+        const list: DocumentationActivity[] = JSON.parse(raw);
+        if (onlyPublished) {
+          return list.filter((i) => i.status === 'published');
+        }
+        return list;
+      } catch (e) {}
+    }
+  }
+
+  return onlyPublished
+    ? DEFAULT_DOCUMENTATION_ACTIVITIES.filter((i) => i.status === 'published')
+    : DEFAULT_DOCUMENTATION_ACTIVITIES;
+}
+
+export async function saveDocumentationActivity(
+  activity: Partial<DocumentationActivity> & { title: string; image_url: string }
+): Promise<{ success: boolean; data?: DocumentationActivity; error?: string }> {
+  const supabase = getSupabase();
+  const id = activity.id || 'act-' + Date.now();
+  const now = new Date().toISOString();
+
+  const record: DocumentationActivity = {
+    id,
+    title: activity.title.trim(),
+    caption: activity.caption?.trim() || '',
+    description: activity.description?.trim() || '',
+    category: activity.category || 'kegiatan_ekspor',
+    activity_date: activity.activity_date || new Date().toISOString().slice(0, 10),
+    location: activity.location?.trim() || '',
+    image_url: activity.image_url,
+    storage_path: activity.storage_path || '',
+    display_order: typeof activity.display_order === 'number' ? activity.display_order : 0,
+    status: activity.status || 'published',
+    created_at: activity.created_at || now,
+    updated_at: now,
+  };
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('documentation_activities')
+        .upsert(record)
+        .select()
+        .single();
+
+      if (!error && data) {
+        syncLocalDocumentation(record);
+        return { success: true, data: data as DocumentationActivity };
+      } else if (error) {
+        console.warn('Supabase upsert documentation error, falling back locally:', error);
+      }
+    } catch (e: any) {
+      console.warn('Supabase network error during documentation save:', e);
+    }
+  }
+
+  // Local fallback
+  syncLocalDocumentation(record);
+  return { success: true, data: record };
+}
+
+function syncLocalDocumentation(record: DocumentationActivity) {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('ptpd_documentation_activities');
+    let list: DocumentationActivity[] = raw ? JSON.parse(raw) : [...DEFAULT_DOCUMENTATION_ACTIVITIES];
+    const index = list.findIndex((x) => x.id === record.id);
+    if (index >= 0) {
+      list[index] = record;
+    } else {
+      list.unshift(record);
+    }
+    localStorage.setItem('ptpd_documentation_activities', JSON.stringify(list));
+    window.dispatchEvent(new CustomEvent('ptpd_documentation_updated'));
+    window.dispatchEvent(new CustomEvent('ptpd_data_updated'));
+  } catch (e) {
+    console.error('Error saving documentation locally:', e);
+  }
+}
+
+export async function deleteDocumentationActivity(id: string, storagePath?: string): Promise<boolean> {
+  const supabase = getSupabase();
+
+  // 1. If storagePath exists, remove file from Supabase Storage bucket
+  if (storagePath) {
+    await deleteImageFromStorage(storagePath);
+  }
+
+  // 2. Delete database record
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('documentation_activities').delete().eq('id', id);
+      if (!error) {
+        removeLocalDocumentation(id);
+        return true;
+      }
+    } catch (e) {
+      console.warn('Supabase delete documentation error:', e);
+    }
+  }
+
+  // Local fallback
+  removeLocalDocumentation(id);
+  return true;
+}
+
+function removeLocalDocumentation(id: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('ptpd_documentation_activities');
+    const list: DocumentationActivity[] = raw ? JSON.parse(raw) : [...DEFAULT_DOCUMENTATION_ACTIVITIES];
+    const updated = list.filter((x) => x.id !== id);
+    localStorage.setItem('ptpd_documentation_activities', JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('ptpd_documentation_updated'));
+    window.dispatchEvent(new CustomEvent('ptpd_data_updated'));
+  } catch (e) {
+    console.error('Error deleting documentation locally:', e);
+  }
+}
+
+// ==========================================
+// SUPABASE STORAGE: UPLOAD & DELETE
+// ==========================================
+
+export async function uploadImageToStorage(
+  file: File,
+  category = 'kegiatan_ekspor'
+): Promise<{ url: string; path: string; error?: string }> {
+  const supabase = getSupabase();
+  const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const cleanName = file.name
+    .replace(/\.[^/.]+$/, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '_');
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.toLocaleString('en-US', { month: 'long' }).toLowerCase();
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  const filePath = `documentation/${year}/${month}/${cleanName}_${randomSuffix}.${fileExt}`;
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.storage
+        .from('documentation')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (error) {
+        console.warn('Supabase storage upload error:', error);
+      } else if (data) {
+        const { data: publicUrlData } = supabase.storage
+          .from('documentation')
+          .getPublicUrl(data.path);
+
+        const url = publicUrlData.publicUrl;
+
+        // Also record in media_assets table
+        await registerMediaAsset({
+          file_name: file.name,
+          file_size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+          file_type: file.type || 'image/jpeg',
+          image_url: url,
+          storage_path: data.path,
+          category,
+        });
+
+        return { url, path: data.path };
+      }
+    } catch (e: any) {
+      console.warn('Supabase storage upload network error:', e);
+    }
+  }
+
+  // Fallback / Instant preview: create object URL or base64 reader for offline/bridge mode
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const resultUrl = reader.result as string;
+      const mockPath = `documentation/${year}/${month}/${cleanName}_${randomSuffix}.${fileExt}`;
+      await registerMediaAsset({
+        file_name: file.name,
+        file_size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+        file_type: file.type || 'image/jpeg',
+        image_url: resultUrl,
+        storage_path: mockPath,
+        category,
+      });
+      resolve({ url: resultUrl, path: mockPath });
+    };
+    reader.onerror = () => {
+      resolve({ url: '', path: '', error: 'Failed to read file' });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function deleteImageFromStorage(path: string): Promise<boolean> {
+  const supabase = getSupabase();
+  if (supabase && path) {
+    try {
+      const { error } = await supabase.storage.from('documentation').remove([path]);
+      if (!error) return true;
+    } catch (e) {
+      console.warn('Supabase delete storage file error:', e);
+    }
+  }
+  return true;
+}
+
+// ==========================================
+// MEDIA ASSETS LIBRARY
+// ==========================================
+
+export async function registerMediaAsset(asset: Omit<MediaAsset, 'id' | 'created_at'>): Promise<MediaAsset> {
+  const supabase = getSupabase();
+  const id = 'med-' + Date.now();
+  const record: MediaAsset = {
+    ...asset,
+    id,
+    created_at: new Date().toISOString(),
+  };
+
+  if (supabase) {
+    try {
+      await supabase.from('media_assets').upsert(record);
+    } catch (e) {
+      console.warn('Supabase register media asset error:', e);
+    }
+  }
+
+  // Local sync
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('ptpd_media_assets');
+      const list: MediaAsset[] = raw ? JSON.parse(raw) : [...DEFAULT_MEDIA_ASSETS];
+      list.unshift(record);
+      localStorage.setItem('ptpd_media_assets', JSON.stringify(list));
+      window.dispatchEvent(new CustomEvent('ptpd_media_updated'));
+    } catch (e) {}
+  }
+
+  return record;
+}
+
+export async function fetchMediaAssets(): Promise<MediaAsset[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('media_assets')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        return data as MediaAsset[];
+      }
+    } catch (e) {
+      console.warn('Supabase fetch media error:', e);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const raw = localStorage.getItem('ptpd_media_assets');
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {}
+    }
+  }
+
+  return DEFAULT_MEDIA_ASSETS;
+}
+
+export async function deleteMediaAsset(id: string, path: string): Promise<boolean> {
+  const supabase = getSupabase();
+  if (path) {
+    await deleteImageFromStorage(path);
+  }
+
+  if (supabase) {
+    try {
+      await supabase.from('media_assets').delete().eq('id', id);
+    } catch (e) {
+      console.warn('Supabase delete media asset error:', e);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('ptpd_media_assets');
+      const list: MediaAsset[] = raw ? JSON.parse(raw) : [...DEFAULT_MEDIA_ASSETS];
+      const updated = list.filter((m) => m.id !== id);
+      localStorage.setItem('ptpd_media_assets', JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent('ptpd_media_updated'));
+      return true;
+    } catch (e) {}
+  }
+
+  return true;
+}
+

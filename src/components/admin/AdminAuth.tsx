@@ -8,27 +8,32 @@ interface AdminAuthProps {
 }
 
 export const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated, onExitToWebsite }) => {
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('manparta0101@gmail.com');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
 
-  const { isConfigured, url } = getSupabaseConfig();
+  const { isConfigured } = getSupabaseConfig();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setInfoMsg(null);
 
-    if (!email.trim() || !password.trim()) {
-      setErrorMsg('Please enter both email and password.');
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail !== 'manparta0101@gmail.com') {
+      setErrorMsg('Akses ditolak: Hanya akun manparta0101@gmail.com yang memiliki hak akses administrator.');
+      return;
+    }
+
+    if (!password.trim()) {
+      setErrorMsg('Silakan masukkan password / Please enter your password.');
       return;
     }
 
     if (password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters.');
+      setErrorMsg('Password minimal 6 karakter / Password must be at least 6 characters.');
       return;
     }
 
@@ -38,38 +43,25 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated, onExitToW
       const supabase = getSupabase();
 
       if (supabase && isConfigured) {
-        if (isSignUp) {
-          const { data, error } = await supabase.auth.signUp({
-            email: email.trim(),
-            password: password.trim(),
-          });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: password.trim(),
+        });
 
-          if (error) {
-            setErrorMsg(error.message);
-          } else if (data.session) {
-            onAuthenticated({ email: data.user?.email || email, role: 'admin' });
-          } else {
-            setInfoMsg('Account created. If email confirmation is enabled on your Supabase project, check your inbox, or sign in now.');
-            setIsSignUp(false);
+        if (error) {
+          setErrorMsg(error.message);
+        } else if (data.user) {
+          if (data.user.email?.toLowerCase() !== 'manparta0101@gmail.com') {
+            await supabase.auth.signOut();
+            setErrorMsg('Akses ditolak: Hanya akun manparta0101@gmail.com yang berwenang sebagai administrator.');
+            return;
           }
-        } else {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password: password.trim(),
-          });
-
-          if (error) {
-            setErrorMsg(error.message);
-          } else if (data.user) {
-            onAuthenticated({ email: data.user.email || email, role: 'admin' });
-          }
+          onAuthenticated({ email: data.user.email, role: 'admin' });
         }
       } else {
-        // When Supabase project keys are not yet configured in .env or settings,
-        // we authenticate locally to grant administrator access so the engineer/client
-        // can enter the dashboard and configure Supabase project keys!
-        sessionStorage.setItem('ptpd_admin_session', JSON.stringify({ email: email.trim(), role: 'admin' }));
-        onAuthenticated({ email: email.trim(), role: 'admin' });
+        // Initial setup mode or local admin access
+        sessionStorage.setItem('ptpd_admin_session', JSON.stringify({ email: cleanEmail, role: 'admin' }));
+        onAuthenticated({ email: cleanEmail, role: 'admin' });
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Authentication error.');
@@ -129,20 +121,28 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated, onExitToW
 
             <form onSubmit={handleAuth} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Administrator Email
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Administrator Email
+                  </label>
+                  <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    Akun Resmi
+                  </span>
+                </div>
                 <div className="relative">
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@partadirgantara.com"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm bg-white/90 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/30"
+                    placeholder="manparta0101@gmail.com"
+                    className="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm bg-slate-50/80 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/30 font-medium text-slate-800"
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                 </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Khusus administrator PT PARTA DIRGANTARA (manparta0101@gmail.com)
+                </p>
               </div>
 
               <div>
@@ -165,13 +165,13 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated, onExitToW
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-[#FF6B00] to-[#E65100] hover:from-[#FF7A1A] hover:to-[#D84900] disabled:opacity-60 rounded-xl shadow-md transition-all active:scale-[0.99]"
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-[#FF6B00] to-[#E65100] hover:from-[#FF7A1A] hover:to-[#D84900] disabled:opacity-60 rounded-xl shadow-md transition-all active:scale-[0.99] cursor-pointer"
               >
                 {isLoading ? (
-                  <span>Authenticating...</span>
+                  <span>Memverifikasi Otorisasi...</span>
                 ) : (
                   <>
-                    <span>{isSignUp ? 'Create Admin Account' : 'Sign In to Admin Dashboard'}</span>
+                    <span>Sign In to Admin Dashboard</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -179,18 +179,15 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated, onExitToW
             </form>
 
             <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-[#E65100] hover:underline font-medium"
-              >
-                {isSignUp ? 'Already have an admin account? Sign in' : 'First time? Create new admin account'}
-              </button>
+              <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 inline" />
+                Admin: manparta0101@gmail.com
+              </span>
 
               <button
                 type="button"
                 onClick={onExitToWebsite}
-                className="text-slate-500 hover:text-slate-800"
+                className="text-slate-500 hover:text-slate-800 font-medium transition-colors cursor-pointer"
               >
                 Back to Website
               </button>
@@ -202,3 +199,4 @@ export const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated, onExitToW
     </div>
   );
 };
+

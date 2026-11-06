@@ -70,6 +70,11 @@ export const Footer: React.FC<FooterProps> = ({ currentLang, onLanguageChange, s
                 </a>
               </li>
               <li>
+                <a href="#gallery" className="hover:text-[#FF6B00] transition-colors">
+                  {t.nav.gallery}
+                </a>
+              </li>
+              <li>
                 <a href="#documents" className="hover:text-[#FF6B00] transition-colors">
                   {t.nav.documents}
                 </a>

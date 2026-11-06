@@ -100,6 +100,35 @@ CREATE TABLE IF NOT EXISTS public.buyers (
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 7. DOCUMENTATION ACTIVITIES TABLE
+CREATE TABLE IF NOT EXISTS public.documentation_activities (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title TEXT NOT NULL,
+  caption TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL DEFAULT 'kegiatan_ekspor',
+  activity_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  location TEXT,
+  image_url TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'published' CHECK (status IN ('published', 'draft')),
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. MEDIA ASSETS LIBRARY TABLE
+CREATE TABLE IF NOT EXISTS public.media_assets (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  file_name TEXT NOT NULL,
+  file_size TEXT NOT NULL,
+  file_type TEXT,
+  image_url TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  category TEXT DEFAULT 'general',
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- ========================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ========================================================
@@ -111,16 +140,16 @@ ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.buyers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documentation_activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.media_assets ENABLE ROW LEVEL SECURITY;
 
 -- RFQ INQUIRIES POLICIES
--- Anyone (public buyers) can submit an inquiry
 CREATE POLICY "Public can insert RFQ inquiries" 
   ON public.rfq_inquiries 
   FOR INSERT 
   TO anon, authenticated 
   WITH CHECK (true);
 
--- Only authenticated users (admins) can view or modify RFQ inquiries
 CREATE POLICY "Admins can view and manage RFQs" 
   ON public.rfq_inquiries 
   FOR ALL 
@@ -129,14 +158,12 @@ CREATE POLICY "Admins can view and manage RFQs"
   WITH CHECK (true);
 
 -- PRODUCTS POLICIES
--- Public can view active products
 CREATE POLICY "Public can view active products" 
   ON public.products 
   FOR SELECT 
   TO anon, authenticated 
   USING (is_active = true);
 
--- Admins can manage all products
 CREATE POLICY "Admins can manage products" 
   ON public.products 
   FOR ALL 
@@ -145,14 +172,12 @@ CREATE POLICY "Admins can manage products"
   WITH CHECK (true);
 
 -- DOCUMENTS POLICIES
--- Public can view public documents
 CREATE POLICY "Public can view public documents" 
   ON public.documents 
   FOR SELECT 
   TO anon, authenticated 
   USING (is_public = true);
 
--- Admins can manage all documents
 CREATE POLICY "Admins can manage documents" 
   ON public.documents 
   FOR ALL 
@@ -161,14 +186,12 @@ CREATE POLICY "Admins can manage documents"
   WITH CHECK (true);
 
 -- SITE SETTINGS POLICIES
--- Public can view site settings
 CREATE POLICY "Public can view site settings" 
   ON public.site_settings 
   FOR SELECT 
   TO anon, authenticated 
   USING (true);
 
--- Admins can update site settings
 CREATE POLICY "Admins can update site settings" 
   ON public.site_settings 
   FOR ALL 
@@ -177,10 +200,72 @@ CREATE POLICY "Admins can update site settings"
   WITH CHECK (true);
 
 -- BUYERS POLICIES
--- Strictly authenticated admin access only
 CREATE POLICY "Admins only for buyers directory" 
   ON public.buyers 
   FOR ALL 
   TO authenticated 
   USING (true)
   WITH CHECK (true);
+
+-- DOCUMENTATION ACTIVITIES POLICIES
+CREATE POLICY "Public can read published activities" 
+  ON public.documentation_activities 
+  FOR SELECT 
+  TO anon, authenticated 
+  USING (status = 'published');
+
+CREATE POLICY "Admins can manage all activities" 
+  ON public.documentation_activities 
+  FOR ALL 
+  TO authenticated 
+  USING (true)
+  WITH CHECK (true);
+
+-- MEDIA ASSETS POLICIES
+CREATE POLICY "Public can view media assets" 
+  ON public.media_assets 
+  FOR SELECT 
+  TO anon, authenticated 
+  USING (true);
+
+CREATE POLICY "Admins can manage media assets" 
+  ON public.media_assets 
+  FOR ALL 
+  TO authenticated 
+  USING (true)
+  WITH CHECK (true);
+
+-- ========================================================
+-- STORAGE BUCKET CONFIGURATION & POLICIES
+-- ========================================================
+-- Insert storage bucket for documentation
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('documentation', 'documentation', true) 
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow public read access on documentation bucket
+CREATE POLICY "Public can view documentation images" 
+  ON storage.objects 
+  FOR SELECT 
+  TO anon, authenticated 
+  USING (bucket_id = 'documentation');
+
+-- Allow authenticated admins to upload and delete documentation images
+CREATE POLICY "Admins can upload documentation images" 
+  ON storage.objects 
+  FOR INSERT 
+  TO authenticated 
+  WITH CHECK (bucket_id = 'documentation');
+
+CREATE POLICY "Admins can update documentation images" 
+  ON storage.objects 
+  FOR UPDATE 
+  TO authenticated 
+  USING (bucket_id = 'documentation');
+
+CREATE POLICY "Admins can delete documentation images" 
+  ON storage.objects 
+  FOR DELETE 
+  TO authenticated 
+  USING (bucket_id = 'documentation');
+

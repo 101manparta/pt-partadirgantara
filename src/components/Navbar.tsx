@@ -88,6 +88,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               {t.nav.logistics}
             </a>
             <a
+              href="#gallery"
+              className="whitespace-nowrap shrink-0 hover:text-[#FF6B00] transition-colors py-1 font-semibold text-[#E65100]"
+            >
+              {t.nav.gallery}
+            </a>
+            <a
               href="#documents"
               className="whitespace-nowrap shrink-0 hover:text-[#FF6B00] transition-colors py-1"
             >
@@ -264,6 +270,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="px-2 py-1.5 hover:text-[#FF6B00] transition-colors"
             >
               {t.nav.logistics}
+            </a>
+            <a
+              href="#gallery"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-2 py-1.5 hover:text-[#FF6B00] transition-colors font-semibold text-[#E65100]"
+            >
+              {t.nav.gallery}
             </a>
             <a
               href="#documents"

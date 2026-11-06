@@ -70,6 +70,42 @@ export interface Buyer {
   created_at: string;
 }
 
+export type DocumentationCategory =
+  | 'kegiatan_ekspor'
+  | 'kunjungan'
+  | 'meeting'
+  | 'event'
+  | 'operasional'
+  | 'produk'
+  | 'lainnya';
+
+export interface DocumentationActivity {
+  id: string;
+  title: string;
+  caption: string;
+  description: string;
+  category: DocumentationCategory | string;
+  activity_date: string;
+  location?: string;
+  image_url: string;
+  storage_path: string;
+  display_order: number;
+  status: 'published' | 'draft';
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface MediaAsset {
+  id: string;
+  file_name: string;
+  file_size: string;
+  file_type: string;
+  image_url: string;
+  storage_path: string;
+  category: string;
+  created_at: string;
+}
+
 export interface SiteSettings {
   company_name: string;
   hero_title_en: string;
