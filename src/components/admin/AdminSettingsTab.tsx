@@ -10,20 +10,71 @@ interface SettingsTabProps {
 
 const SUPABASE_SCHEMA_SQL = `-- PT PARTA DIRGANTARA - B2B EXPORT SUPABASE DATABASE SCHEMA
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- 1. PROFILES & ADMIN ROLES
-CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  full_name TEXT,
-  email TEXT UNIQUE,
-  role TEXT DEFAULT 'admin' CHECK (role IN ('admin', 'staff', 'viewer')),
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+-- STORAGE BUCKETS SETUP
+INSERT INTO storage.buckets (id, name, public)
+VALUES 
+  ('activity-images', 'activity-images', true),
+  ('product-images', 'product-images', true),
+  ('documents', 'documents', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- 1. ACTIVITIES TABLE
+CREATE TABLE IF NOT EXISTS public.activities (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title_en TEXT NOT NULL,
+  title_id TEXT,
+  description_en TEXT,
+  description_id TEXT,
+  activity_date DATE DEFAULT CURRENT_DATE,
+  location TEXT,
+  category TEXT DEFAULT 'kegiatan_ekspor',
+  image_url TEXT NOT NULL,
+  image_path TEXT,
+  is_public BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. RFQ INQUIRIES
+-- 2. DOCUMENTS TABLE
+CREATE TABLE IF NOT EXISTS public.documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title_en TEXT NOT NULL,
+  title_id TEXT,
+  category TEXT DEFAULT 'spec_sheet',
+  file_name TEXT NOT NULL,
+  file_url TEXT NOT NULL,
+  storage_path TEXT,
+  file_size TEXT,
+  is_public BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. PRODUCTS TABLE
+CREATE TABLE IF NOT EXISTS public.products (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  botanical_name TEXT,
+  origin TEXT,
+  form TEXT,
+  grade TEXT,
+  description_en TEXT,
+  description_id TEXT,
+  packaging TEXT,
+  moq TEXT,
+  availability TEXT,
+  image_url TEXT,
+  image_path TEXT,
+  is_active BOOLEAN DEFAULT true,
+  specs JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. RFQ INQUIRIES
 CREATE TABLE IF NOT EXISTS public.rfq_inquiries (
   id TEXT PRIMARY KEY,
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
   full_name TEXT NOT NULL,
   company_name TEXT NOT NULL,
   country TEXT NOT NULL,
@@ -40,107 +91,52 @@ CREATE TABLE IF NOT EXISTS public.rfq_inquiries (
   admin_notes TEXT
 );
 
--- 3. PRODUCTS & SPECIFICATIONS
-CREATE TABLE IF NOT EXISTS public.products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  botanical_name TEXT,
-  origin TEXT,
-  form TEXT,
-  grade TEXT,
-  description_en TEXT,
-  description_id TEXT,
-  packaging TEXT,
-  moq TEXT,
-  availability TEXT,
-  image_url TEXT,
-  is_active BOOLEAN DEFAULT true,
-  specs JSONB DEFAULT '[]'::jsonb,
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 4. DOCUMENTS
-CREATE TABLE IF NOT EXISTS public.documents (
-  id TEXT PRIMARY KEY,
-  title_en TEXT NOT NULL,
-  title_id TEXT NOT NULL,
-  category TEXT,
-  file_name TEXT NOT NULL,
-  file_url TEXT NOT NULL,
-  file_size TEXT,
-  is_public BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
 -- 5. SITE SETTINGS
 CREATE TABLE IF NOT EXISTS public.site_settings (
   id TEXT PRIMARY KEY DEFAULT 'main',
   company_name TEXT,
+  hero_title_en TEXT,
+  hero_title_id TEXT,
+  hero_subtitle_en TEXT,
+  hero_subtitle_id TEXT,
+  about_text_en TEXT,
+  about_text_id TEXT,
   email TEXT,
   phone_whatsapp TEXT,
   office_address TEXT,
   operating_hours TEXT,
   primary_port TEXT,
   incoterms_supported TEXT,
-  updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. DOCUMENTATION ACTIVITIES
-CREATE TABLE IF NOT EXISTS public.documentation_activities (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  title TEXT NOT NULL,
-  caption TEXT NOT NULL,
-  description TEXT,
-  category TEXT NOT NULL DEFAULT 'kegiatan_ekspor',
-  activity_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  location TEXT,
-  image_url TEXT NOT NULL,
-  storage_path TEXT NOT NULL,
-  display_order INTEGER DEFAULT 0,
-  status TEXT DEFAULT 'published' CHECK (status IN ('published', 'draft')),
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 7. MEDIA ASSETS
-CREATE TABLE IF NOT EXISTS public.media_assets (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  file_name TEXT NOT NULL,
-  file_size TEXT NOT NULL,
-  file_type TEXT,
-  image_url TEXT NOT NULL,
-  storage_path TEXT NOT NULL,
-  category TEXT DEFAULT 'general',
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- ROW LEVEL SECURITY
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.rfq_inquiries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+-- ROW LEVEL SECURITY (RLS)
+ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rfq_inquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.documentation_activities ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.media_assets ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public can insert RFQ inquiries" ON public.rfq_inquiries FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Admins can manage RFQs" ON public.rfq_inquiries FOR ALL TO authenticated USING (true);
-CREATE POLICY "Public can view active products" ON public.products FOR SELECT TO anon, authenticated USING (is_active = true);
-CREATE POLICY "Admins can manage products" ON public.products FOR ALL TO authenticated USING (true);
-CREATE POLICY "Public can view public documents" ON public.documents FOR SELECT TO anon, authenticated USING (is_public = true);
-CREATE POLICY "Admins can manage documents" ON public.documents FOR ALL TO authenticated USING (true);
-CREATE POLICY "Public can view settings" ON public.site_settings FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "Admins can update settings" ON public.site_settings FOR ALL TO authenticated USING (true);
-CREATE POLICY "Public can view published activities" ON public.documentation_activities FOR SELECT TO anon, authenticated USING (status = 'published');
-CREATE POLICY "Admins can manage activities" ON public.documentation_activities FOR ALL TO authenticated USING (true);
-CREATE POLICY "Public can view media" ON public.media_assets FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "Admins can manage media" ON public.media_assets FOR ALL TO authenticated USING (true);
+CREATE POLICY "Public read activities" ON public.activities FOR SELECT TO anon, authenticated USING (is_public = true);
+CREATE POLICY "Admins manage activities" ON public.activities FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- STORAGE BUCKET
-INSERT INTO storage.buckets (id, name, public) VALUES ('documentation', 'documentation', true) ON CONFLICT (id) DO NOTHING;
-CREATE POLICY "Public can view documentation images" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'documentation');
-CREATE POLICY "Admins can upload documentation images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'documentation');
-CREATE POLICY "Admins can delete documentation images" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'documentation');`;
+CREATE POLICY "Public read documents" ON public.documents FOR SELECT TO anon, authenticated USING (is_public = true);
+CREATE POLICY "Admins manage documents" ON public.documents FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public read products" ON public.products FOR SELECT TO anon, authenticated USING (is_active = true);
+CREATE POLICY "Admins manage products" ON public.products FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public submit RFQ" ON public.rfq_inquiries FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Admins manage RFQs" ON public.rfq_inquiries FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public read settings" ON public.site_settings FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Admins manage settings" ON public.site_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- STORAGE POLICIES
+CREATE POLICY "Public read storage" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id IN ('activity-images', 'product-images', 'documents'));
+CREATE POLICY "Admins upload storage" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id IN ('activity-images', 'product-images', 'documents'));
+CREATE POLICY "Admins update storage" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id IN ('activity-images', 'product-images', 'documents'));
+CREATE POLICY "Admins delete storage" ON storage.objects FOR DELETE TO authenticated USING (bucket_id IN ('activity-images', 'product-images', 'documents'));`;
 
 export const AdminSettingsTab: React.FC<SettingsTabProps> = ({ settings, onRefresh }) => {
   const currentConfig = getSupabaseConfig();

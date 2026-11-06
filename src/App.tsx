@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Language, VisualEffectMode, Product, DocumentItem, SiteSettings, DocumentationActivity } from './lib/types';
+import { Language, VisualEffectMode, Product, DocumentItem, SiteSettings, Activity } from './lib/types';
 import {
   fetchProducts,
   fetchDocuments,
   fetchSettings,
-  fetchDocumentationActivities,
+  fetchActivities,
   DEFAULT_PRODUCT,
   DEFAULT_DOCUMENTS,
   DEFAULT_SETTINGS,
-  DEFAULT_DOCUMENTATION_ACTIVITIES,
+  DEFAULT_ACTIVITIES,
 } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -58,7 +58,7 @@ export default function App() {
   const [product, setProduct] = useState<Product>(DEFAULT_PRODUCT);
   const [documents, setDocuments] = useState<DocumentItem[]>(DEFAULT_DOCUMENTS);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
-  const [activities, setActivities] = useState<DocumentationActivity[]>(DEFAULT_DOCUMENTATION_ACTIVITIES);
+  const [activities, setActivities] = useState<Activity[]>(DEFAULT_ACTIVITIES);
   const [selectedRFQProduct, setSelectedRFQProduct] = useState<string>('Indonesian Whole Dried Cloves (Syzygium aromaticum)');
 
   // Sync route on popstate/hashchange
@@ -85,7 +85,7 @@ export default function App() {
         fetchProducts(),
         fetchDocuments(),
         fetchSettings(),
-        fetchDocumentationActivities(true),
+        fetchActivities(true),
       ]);
       if (prods && prods.length > 0) setProduct(prods[0]);
       if (docs && docs.length > 0) setDocuments(docs);
@@ -104,10 +104,10 @@ export default function App() {
       loadPublicData();
     };
     window.addEventListener('ptpd_data_updated', handleDataUpdated);
-    window.addEventListener('ptpd_documentation_updated', handleDataUpdated);
+    window.addEventListener('ptpd_activities_updated', handleDataUpdated);
     return () => {
       window.removeEventListener('ptpd_data_updated', handleDataUpdated);
-      window.removeEventListener('ptpd_documentation_updated', handleDataUpdated);
+      window.removeEventListener('ptpd_activities_updated', handleDataUpdated);
     };
   }, []);
 

@@ -14,18 +14,18 @@ import {
   FileEdit,
   Layers,
 } from 'lucide-react';
-import { RFQInquiry, Product, DocumentItem, SiteSettings, DocumentationActivity } from '../../lib/types';
+import { RFQInquiry, Product, DocumentItem, SiteSettings, Activity } from '../../lib/types';
 import {
   getSupabaseConfig,
   fetchRFQs,
   fetchProducts,
   fetchDocuments,
   fetchSettings,
-  fetchDocumentationActivities,
+  fetchActivities,
 } from '../../lib/supabase';
 import { AdminAuth } from './AdminAuth';
 import { AdminDashboardTab } from './AdminDashboardTab';
-import { AdminDocumentationTab } from './AdminDocumentationTab';
+import { AdminActivitiesTab } from './AdminActivitiesTab';
 import { AdminMediaLibraryTab } from './AdminMediaLibraryTab';
 import { AdminInquiriesTab } from './AdminInquiriesTab';
 import { AdminProductsTab } from './AdminProductsTab';
@@ -46,7 +46,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onExitToWebsite }) => 
   const [products, setProducts] = useState<Product[]>([]);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [activities, setActivities] = useState<DocumentationActivity[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check existing session (strictly manparta0101@gmail.com)
@@ -75,7 +75,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onExitToWebsite }) => 
         fetchProducts(),
         fetchDocuments(),
         fetchSettings(),
-        fetchDocumentationActivities(false),
+        fetchActivities(false),
       ]);
       setRfqs(r);
       setProducts(p);
@@ -293,7 +293,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onExitToWebsite }) => 
 
             {/* 2. GALERI & DOKUMENTASI (Fokus utama CMS) */}
             {activeTab === 'documentation' && (
-              <AdminDocumentationTab activities={activities} onRefresh={loadAllData} />
+              <AdminActivitiesTab activities={activities} onRefresh={loadAllData} />
             )}
 
             {/* 3. MEDIA LIBRARY */}

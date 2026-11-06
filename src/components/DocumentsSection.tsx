@@ -114,12 +114,16 @@ export const DocumentsSection: React.FC<DocumentsProps> = ({ currentLang, docume
               </button>
               <button
                 onClick={() => {
-                  window.print();
+                  if (activeDocModal.file_url && activeDocModal.file_url !== '#') {
+                    window.open(activeDocModal.file_url, '_blank', 'noopener,noreferrer');
+                  } else {
+                    window.print();
+                  }
                   setActiveDocModal(null);
                 }}
-                className="px-4 py-2 text-xs font-semibold text-white bg-[#FF6B00] hover:bg-[#E65100] rounded-lg shadow-sm"
+                className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-[#FF6B00] to-[#E65100] hover:from-[#FF7A1A] hover:to-[#D84900] rounded-lg shadow-sm cursor-pointer"
               >
-                Download / Print PDF
+                Unduh Dokumen / Download PDF
               </button>
             </div>
           </div>

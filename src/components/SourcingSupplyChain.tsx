@@ -67,7 +67,7 @@ export const SourcingSupplyChain: React.FC<SourcingProps> = ({ currentLang }) =>
             <div className="lg:col-span-5">
               <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-md border border-slate-100">
                 <img
-                  src="/src/assets/images/export_quality_sorting_1793940754934.jpg"
+                  src="/images/export_quality_sorting.jpg"
                   alt="Quality control and export packing facility"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"

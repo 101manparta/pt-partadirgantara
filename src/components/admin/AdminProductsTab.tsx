@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Save, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Product, ProductSpec } from '../../lib/types';
-import { saveProducts } from '../../lib/supabase';
+import { updateProduct } from '../../lib/supabase';
 
 interface ProductsTabProps {
   products: Product[];
@@ -47,11 +47,11 @@ export const AdminProductsTab: React.FC<ProductsTabProps> = ({ products, onRefre
   };
 
   const handleSave = async () => {
+    if (!currentProduct) return;
     setIsSaving(true);
     setSaveStatus(null);
 
-    const updatedProduct: Product = {
-      ...currentProduct,
+    const updatedProduct: Partial<Product> = {
       name,
       botanical_name: botanicalName,
       origin,
@@ -63,14 +63,15 @@ export const AdminProductsTab: React.FC<ProductsTabProps> = ({ products, onRefre
       specs,
     };
 
-    const ok = await saveProducts([updatedProduct]);
+    const res = await updateProduct(currentProduct.id, updatedProduct);
     setIsSaving(false);
 
-    if (ok) {
-      setSaveStatus('Product specifications updated successfully in database.');
+    if (res.success) {
+      setSaveStatus('Spesifikasi produk berhasil diperbarui di database Supabase.');
+      setTimeout(() => setSaveStatus(null), 3500);
       onRefresh();
     } else {
-      setSaveStatus('Failed to save changes. Please try again.');
+      setSaveStatus('Gagal menyimpan perubahan: ' + (res.error || 'Silakan periksa koneksi Supabase Anda.'));
     }
   };
 

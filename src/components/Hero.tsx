@@ -88,7 +88,7 @@ export const Hero: React.FC<HeroProps> = ({ currentLang, onExploreCloves, onRequ
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/80 p-2 glass-panel glass-glow-orange group">
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-900">
                 <img
-                  src="/src/assets/images/hero_indonesian_cloves_1793940752489.jpg"
+                  src="/images/hero_indonesian_cloves.jpg"
                   alt="Premium Indonesian Whole Dried Cloves (Syzygium aromaticum) by PT PARTA DIRGANTARA"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"

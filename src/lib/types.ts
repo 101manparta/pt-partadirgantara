@@ -42,6 +42,7 @@ export interface Product {
   moq: string;
   availability: string;
   image_url: string;
+  image_path?: string;
   is_active: boolean;
   specs: ProductSpec[];
 }
@@ -50,11 +51,28 @@ export interface DocumentItem {
   id: string;
   title_en: string;
   title_id: string;
-  category: 'profile' | 'catalog' | 'spec_sheet' | 'certification';
+  category: 'profile' | 'catalog' | 'spec_sheet' | 'certification' | string;
   file_name: string;
   file_url: string;
+  storage_path?: string;
   file_size: string;
   is_public: boolean;
+  created_at: string;
+}
+
+export interface Activity {
+  id: string;
+  title_en: string;
+  title_id: string;
+  description_en: string;
+  description_id: string;
+  activity_date: string;
+  location?: string;
+  category: string;
+  image_url: string;
+  image_path?: string;
+  is_public: boolean;
+  sort_order: number;
   created_at: string;
 }
 

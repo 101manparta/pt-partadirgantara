@@ -5,21 +5,17 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Maximize2,
-  Filter,
-  Grid,
   SlidersHorizontal,
-  Layers,
+  Grid,
   ArrowUpRight,
-  Eye,
 } from 'lucide-react';
-import { Language, DocumentationActivity, DocumentationCategory } from '../lib/types';
+import { Language, Activity } from '../lib/types';
 import { translations } from '../lib/translations';
 import { SectionVector } from './SectionVectors';
 
 interface GalleryProps {
   currentLang: Language;
-  activities: DocumentationActivity[];
+  activities: Activity[];
 }
 
 export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, activities }) => {
@@ -28,9 +24,9 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
   const [viewMode, setViewMode] = useState<'stream' | 'grid'>('stream');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  // Filter only published activities
+  // Filter only public activities
   const publishedList = useMemo(() => {
-    return activities.filter((act) => act.status === 'published');
+    return activities.filter((act) => act.is_public !== false);
   }, [activities]);
 
   const filtered = useMemo(() => {
@@ -89,6 +85,20 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
     }
   };
 
+  const getItemTitle = (item: Activity) => {
+    if (currentLang === 'id') {
+      return item.title_id || item.title_en || (item as any).title || '';
+    }
+    return item.title_en || item.title_id || (item as any).title || '';
+  };
+
+  const getItemDescription = (item: Activity) => {
+    if (currentLang === 'id') {
+      return item.description_id || item.description_en || (item as any).caption || '';
+    }
+    return item.description_en || item.description_id || (item as any).caption || '';
+  };
+
   return (
     <section id="gallery" className="relative py-20 lg:py-28 bg-[#FFFFFF] overflow-hidden">
       {/* Background Vector: Cargo Aircraft / Logistics */}
@@ -117,7 +127,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
           <div className="flex items-center gap-2 shrink-0 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
             <button
               onClick={() => setViewMode('stream')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 viewMode === 'stream'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
@@ -128,7 +138,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer ${
                 viewMode === 'grid'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
@@ -144,7 +154,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
         <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 text-xs font-medium no-scrollbar">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border ${
+            className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border cursor-pointer ${
               selectedCategory === 'all'
                 ? 'bg-gradient-to-r from-[#FF6B00] to-[#E65100] text-white border-transparent font-semibold shadow-xs'
                 : 'bg-white text-slate-600 border-slate-200/80 hover:border-slate-300'
@@ -156,7 +166,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
             <button
               key={key}
               onClick={() => setSelectedCategory(key)}
-              className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border ${
+              className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border cursor-pointer ${
                 selectedCategory === key
                   ? 'bg-gradient-to-r from-[#FF6B00] to-[#E65100] text-white border-transparent font-semibold shadow-xs'
                   : 'bg-white text-slate-600 border-slate-200/80 hover:border-slate-300'
@@ -183,7 +193,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
            MODE A: DYNAMIC DUAL-TRACK OPPOSING SCROLL STREAM
            - Row 1: Left to Right (animate-marquee-ltr)
            - Row 2: Right to Left (animate-marquee-rtl)
-           - Vertical subtle floating rhythms
+           - Pauses on hover
            =================================================== */
         <div className="space-y-6 select-none">
           
@@ -193,48 +203,48 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
             <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
             <div className="animate-marquee-ltr flex items-center gap-5">
-              {[...row1, ...row1, ...row1].map((item, idx) => (
+              {[...row1, ...row1, ...row1, ...row1].map((item, idx) => (
                 <div
                   key={`r1-${item.id}-${idx}`}
                   onClick={() => {
                     const originalIdx = filtered.findIndex((x) => x.id === item.id);
                     setLightboxIndex(originalIdx >= 0 ? originalIdx : 0);
                   }}
-                  className={`w-[320px] sm:w-[380px] shrink-0 rounded-2xl glass-panel border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group ${
+                  className={`w-[320px] sm:w-[380px] shrink-0 rounded-2xl glass-panel border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group bg-white ${
                     idx % 2 === 0 ? 'animate-float-down' : 'animate-float-up'
                   }`}
                 >
                   <div className="aspect-[16/10] overflow-hidden bg-slate-900 relative">
                     <img
                       src={item.image_url}
-                      alt={item.title}
+                      alt={getItemTitle(item)}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent opacity-85 group-hover:opacity-65 transition-opacity" />
 
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-bold text-[#E65100] uppercase tracking-wide">
+                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-bold text-[#E65100] uppercase tracking-wide shadow-xs">
                       {getCategoryLabel(item.category)}
                     </div>
 
                     <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <div className="flex items-center gap-1.5 text-[11px] text-white/80 font-mono mb-1">
+                      <div className="flex items-center gap-1.5 text-[11px] text-white/90 font-mono mb-1">
                         <Calendar className="w-3 h-3 text-[#FF6B00]" />
                         <span>{formatDate(item.activity_date)}</span>
                       </div>
                       <h4 className="text-sm font-bold leading-snug line-clamp-1 drop-shadow-xs">
-                        {item.title}
+                        {getItemTitle(item)}
                       </h4>
                     </div>
                   </div>
 
-                  <div className="p-3.5 bg-white/95">
+                  <div className="p-3.5 bg-white">
                     <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {item.caption}
+                      {getItemDescription(item)}
                     </p>
                     {item.location && (
                       <div className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
-                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                        <MapPin className="w-3 h-3 text-[#FF6B00] shrink-0" />
                         <span className="truncate">{item.location}</span>
                       </div>
                     )}
@@ -250,48 +260,48 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
             <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
             <div className="animate-marquee-rtl flex items-center gap-5">
-              {[...row2, ...row2, ...row2].map((item, idx) => (
+              {[...row2, ...row2, ...row2, ...row2].map((item, idx) => (
                 <div
                   key={`r2-${item.id}-${idx}`}
                   onClick={() => {
                     const originalIdx = filtered.findIndex((x) => x.id === item.id);
                     setLightboxIndex(originalIdx >= 0 ? originalIdx : 0);
                   }}
-                  className={`w-[320px] sm:w-[380px] shrink-0 rounded-2xl glass-panel border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group ${
+                  className={`w-[320px] sm:w-[380px] shrink-0 rounded-2xl glass-panel border border-slate-200/90 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group bg-white ${
                     idx % 2 === 0 ? 'animate-float-up' : 'animate-float-down'
                   }`}
                 >
                   <div className="aspect-[16/10] overflow-hidden bg-slate-900 relative">
                     <img
                       src={item.image_url}
-                      alt={item.title}
+                      alt={getItemTitle(item)}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent opacity-85 group-hover:opacity-65 transition-opacity" />
 
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-bold text-[#E65100] uppercase tracking-wide">
+                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-bold text-[#E65100] uppercase tracking-wide shadow-xs">
                       {getCategoryLabel(item.category)}
                     </div>
 
                     <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <div className="flex items-center gap-1.5 text-[11px] text-white/80 font-mono mb-1">
+                      <div className="flex items-center gap-1.5 text-[11px] text-white/90 font-mono mb-1">
                         <Calendar className="w-3 h-3 text-[#FF6B00]" />
                         <span>{formatDate(item.activity_date)}</span>
                       </div>
                       <h4 className="text-sm font-bold leading-snug line-clamp-1 drop-shadow-xs">
-                        {item.title}
+                        {getItemTitle(item)}
                       </h4>
                     </div>
                   </div>
 
-                  <div className="p-3.5 bg-white/95">
+                  <div className="p-3.5 bg-white">
                     <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {item.caption}
+                      {getItemDescription(item)}
                     </p>
                     {item.location && (
                       <div className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
-                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                        <MapPin className="w-3 h-3 text-[#FF6B00] shrink-0" />
                         <span className="truncate">{item.location}</span>
                       </div>
                     )}
@@ -312,13 +322,13 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
               <div
                 key={item.id}
                 onClick={() => setLightboxIndex(idx)}
-                className="rounded-2xl glass-panel border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between group"
+                className="rounded-2xl glass-panel border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between group bg-white"
               >
                 <div>
                   <div className="aspect-[16/10] overflow-hidden bg-slate-900 relative">
                     <img
                       src={item.image_url}
-                      alt={item.title}
+                      alt={getItemTitle(item)}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       referrerPolicy="no-referrer"
                     />
@@ -334,10 +344,10 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
                     </div>
 
                     <h3 className="text-base font-bold text-slate-900 tracking-tight leading-snug">
-                      {item.title}
+                      {getItemTitle(item)}
                     </h3>
                     <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
-                      {item.caption}
+                      {getItemDescription(item)}
                     </p>
                   </div>
                 </div>
@@ -364,18 +374,15 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
 
       {/* ===================================================
           LIGHTBOX MODAL
-          - Large view, Next/Prev, Title, Caption, Description, Date, Location
           =================================================== */}
       {currentItem && lightboxIndex !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn">
-          {/* Background backdrop click */}
           <div
             className="absolute inset-0"
             onClick={() => setLightboxIndex(null)}
           />
 
           <div className="relative z-10 bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-white/20 flex flex-col overflow-hidden">
-            
             {/* Top Modal Header */}
             <div className="p-4 sm:px-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
               <div className="flex items-center gap-2 text-xs">
@@ -390,7 +397,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setLightboxIndex(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
                   title={t.documentation.closeLightbox}
                 >
                   <X className="w-5 h-5" />
@@ -398,16 +405,15 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
               </div>
             </div>
 
-            {/* Main Image Container with Next / Prev buttons */}
+            {/* Main Image Container */}
             <div className="relative bg-slate-950 flex items-center justify-center min-h-[300px] sm:min-h-[420px] max-h-[55vh]">
               <img
                 src={currentItem.image_url}
-                alt={currentItem.title}
+                alt={getItemTitle(currentItem)}
                 className="max-h-[55vh] w-auto max-w-full object-contain mx-auto"
                 referrerPolicy="no-referrer"
               />
 
-              {/* Prev Button */}
               {filtered.length > 1 && (
                 <button
                   type="button"
@@ -416,14 +422,13 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
                       prev !== null ? (prev - 1 + filtered.length) % filtered.length : 0
                     )
                   }
-                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-sm transition-all focus:outline-none"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
                   title={t.documentation.prevPhoto}
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
               )}
 
-              {/* Next Button */}
               {filtered.length > 1 && (
                 <button
                   type="button"
@@ -432,7 +437,7 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
                       prev !== null ? (prev + 1) % filtered.length : 0
                     )
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-sm transition-all focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
                   title={t.documentation.nextPhoto}
                 >
                   <ChevronRight className="w-6 h-6" />
@@ -444,16 +449,13 @@ export const DocumentationGallery: React.FC<GalleryProps> = ({ currentLang, acti
             <div className="p-6 sm:p-8 space-y-4 bg-white">
               <div>
                 <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                  {currentItem.title}
+                  {getItemTitle(currentItem)}
                 </h3>
-                <p className="text-sm font-semibold text-[#FF6B00] mt-1">
-                  {currentItem.caption}
-                </p>
               </div>
 
-              {currentItem.description && (
+              {getItemDescription(currentItem) && (
                 <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-sans">
-                  {currentItem.description}
+                  {getItemDescription(currentItem)}
                 </p>
               )}
 

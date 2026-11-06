@@ -48,7 +48,7 @@ export const ClovesSection: React.FC<ClovesSectionProps> = ({
             <div className="lg:col-span-5 relative group">
               <div className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 shadow-md border border-slate-100 relative">
                 <img
-                  src={product.image_url || '/src/assets/images/product_whole_cloves_1793940753160.jpg'}
+                  src={product.image_url || '/images/product_whole_cloves.jpg'}
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
